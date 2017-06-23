@@ -75,6 +75,7 @@ def read_sif(path, directed=True):
 
         ig.Graph : Graph encoded in the SIF file (hopefully;)
     '''
+    # TODO?: add sif validation
     nodes = set()
     edges = list()
     interactions = list()
