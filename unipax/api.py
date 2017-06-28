@@ -5,9 +5,13 @@ This module implements the Python wrapper around the UniPAX REST API.
 ################################################################################
 
 import os
+import io
 import time
+import threading
+import webbrowser
 
 import requests
+import pandas as pd
 
 import unipax.graph
 
@@ -66,6 +70,11 @@ class UniPaxRestApi(object):
         self.graph = UniPaxRestGraph(self)
         self.all = UniPaxRestAll(self)
         self.info = UniPaxRestInfo(self)
+        self.help = UniPaxRestHelp(self)
+        self.get = UniPaxRestGet(self)
+        self.download = self.get.download
+        self.id = UniPaxRestGet(self)    # <unipax>/get & <unipax>/id do the same thing!?
+        # self.datasource = UniPaxDatasource(self)
 
     @property
     def url(self):
@@ -102,48 +111,87 @@ class UniPaxRestEndpoint(UniPaxRestNode):
     '''
     A REST endpoint (something you can query).
     '''
-    def __init__(self, parent):
-        super().__init__(parent)
 
-    def __call__(self, **params):
+    def __call__(self, *args, **params):
         '''
         Endpoints a callable with the query parameters as arguments.
         '''
-        return self.query(**params)
+        return self.query(*args, **params)
 
-    def _query(self, **params):
+    def _get(self, url, *args, **params):
         '''
-        Send GET request to <unipax>/(node/)*/endpoint with query parameters params.
-
-        Returns raw http response.
+        Returns raw http response
         '''
-        response = requests.get(self.url, params=params)
+        if args: 
+            url += '/'
+            url += ','.join([arg for arg in args])
+        response = requests.get(url, params=params)
         if response.status_code != 200:
             raise UniPaxException
         return response
 
-    def raw(self, **params):
+    def get(self, *args, **params):
         '''
         Returns the raw http response.
 
-        Strictly speaking redundant, see self._query
         '''
-        self._query(**params)
+        return self._get(self.url, *args, **params)
 
-    def query(self, **params):
+    def download(self, path, *args, **params):
+        response = self.get(*args, **params)
+        with open(path, 'wb') as downloaded_file:
+            downloaded_file.write( response.content )
+
+    def query(self, *args, **params):
         '''
         Query method. To be implemented by subclasses (ie physical endpoint classes)
         '''
-        raise NotImplementedError
+        raise self.get(*args, **params).content
 
-    def _return_list_from_query(self, **params):
+    def _return_list_from_query(self, *args, **params):
         '''
         Standard implemetation of queries which return a list of items.
 
-        Meant to be used by subclasses to implement self.query.
+        Meant to be used by subclasses to overwrite self.query.
         '''
-        response = self._query(**params)
+        response = self.query(*args, **params)
         return [item.strip() for item in response.content.decode('utf-8').split('\n') if item]
+
+################################################################################
+################################################################################
+ # <unipax>/help #
+################################################################################
+
+class UniPaxRestHelp(UniPaxRestEndpoint):
+    _append = '/help'
+
+    def query(self, tab=True):
+        new = 2 if tab else 1
+        thread = threading.Thread(target=lambda: webbrowser.open(self.url, new))
+        thread.start()
+
+
+################################################################################
+################################################################################
+ # <unipax>/get #
+################################################################################
+
+class UniPaxRestGet(UniPaxRestEndpoint):
+    '''
+    <unipax>/get REST endpoint.
+
+    Original documentation at <unipax>/help:
+
+        Returns one or more objects from the database.
+
+        Syntax: /get/<unipaxId>,<unipaxId>,...?format=(biopax|graphml|gmx|gmt)&recursive=(true|false)
+
+        Parameters:
+            format - specifies the output format (for more than one unipaxId gmx format is changed into gmt format)
+            recursive - only if format=biopax, whether or not to output referenced objects
+    '''
+
+    _append = '/get'
 
 ################################################################################
 ################################################################################
@@ -179,9 +227,7 @@ class UniPaxRestAllTypes(UniPaxRestEndpoint):
         Parameters:
             filter - restrict to BioPAX or SBML objects
     '''
-    def __init__(self, parent):
-        super().__init__(parent)
-        self._append = '/'
+    _append = '/'
 
     def query(self, **params):
         return self._return_list_from_query(**params)
@@ -213,7 +259,15 @@ class UniPaxRestType(UniPaxRestEndpoint):
         self._append = '/'+name
 
     def query(self, **params):
-        return self._return_list_from_query(**params)
+        format_ = params.get('format', 'ids')
+        if format_ == 'ids':
+            return self._return_list_from_query(**params)
+        elif format_ == 'biopax':
+            return self.get(**params).content
+        elif format_ == 'attributes':
+            response = self.get(**params)
+            data = io.StringIO(response.content.decode('utf-8'))
+            return pd.read_table(data, header=0)
 
 ################################################################################
 ################################################################################
@@ -224,9 +278,10 @@ class UniPaxRestInfo(UniPaxRestNode):
     '''
     <unipax>/info REST node.
     '''
-    def __init__(self, api):
-        super().__init__(api)
-        self._append = '/info'
+    _append = '/info'
+
+    def __init__(self, parent):
+        super().__init__(parent)
         self.xrefdbs = UniPaxRestInfoXRefDBs(self)
 
 ################################################################################
@@ -241,12 +296,10 @@ class UniPaxRestInfoXRefDBs(UniPaxRestEndpoint):
 
         Returns a list of all databases referenced
     '''
-    def __init__(self, node):
-        super().__init__(node)
-        self._append = '/xrefdbs'
+    _append = '/xrefdbs'
 
     def query(self):
-        return self._return_list_from_query(**params)
+        return self._return_list_from_query()
 
 ################################################################################
 ################################################################################
@@ -257,8 +310,8 @@ class UniPaxRestGraph(UniPaxRestNode):
     '''
     <unipax>/graph REST node.
     '''
-    def __init__(self, api):
-        super().__init__(api)
+    def __init__(self, parent):
+        super().__init__(parent)
         self._append = '/graph'
         self.regulatory = UniPaxRestGraphRegulatory(self)
         self.metabolic = UniPaxRestGraphMetabolic(self)
@@ -272,8 +325,6 @@ class UniPaxRestGraphEndpoint(UniPaxRestEndpoint):
     '''
     Base class for <unipax>/graph endpoints.
     '''
-    def __init__(self, node):
-        super().__init__(node)
 
     def query(self, **params):
         tmpfile = self.tmpdir+'unipax_tmp_'+time_stamp()+'.'+params.get('format', 'gml')
@@ -288,11 +339,6 @@ class UniPaxRestGraphEndpoint(UniPaxRestEndpoint):
             graph = unipax.graph.read_sif(tmpfile)
         os.remove(tmpfile)
         return graph
-
-    def download(self, path, **params):
-        response = self._query(**params)
-        with open(path, 'wb') as downloaded_file:
-            downloaded_file.write( response.content )
 
 ################################################################################
  # <unipax>/graph/regulatory #
@@ -316,9 +362,7 @@ class UniPaxRestGraphRegulatory(UniPaxRestGraphEndpoint):
             filter - filter the network by (pathway!<id> | organism!<id> | nodetype!<type> | edgetype!<type>)(,<more filter>)*
 
     '''
-    def __init__(self, node):
-        super().__init__(node)
-        self._append = '/regulatory'
+    _append = '/regulatory'
 
 ################################################################################
  # <unipax>/graph/metabolic #
@@ -341,9 +385,8 @@ class UniPaxRestGraphMetabolic(UniPaxRestGraphEndpoint):
             result - id of a result object from which to construct the network
             filter - filter the network by (pathway!<id> | organism!<id> | nodetype!<type> | edgetype!<type>)(,<more filter>)*
     '''
-    def __init__(self, node):
-        super().__init__(node)
-        self._append = '/metabolic'
+
+    _append = '/metabolic'
 
 ################################################################################
  # <unipax>/graph/ppi #
@@ -366,6 +409,5 @@ class UniPaxRestGraphPpi(UniPaxRestGraphEndpoint):
             result - id of a result object from which to construct the network
             filter - filter the network by (pathway!<id> | organism!<id> | nodetype!<type> | edgetype!<type>)(,<more filter>)*
     '''
-    def __init__(self, node):
-        super().__init__(node)
-        self._append = '/ppi'
+
+    _append = '/ppi'

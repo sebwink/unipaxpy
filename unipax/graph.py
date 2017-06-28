@@ -75,7 +75,6 @@ def read_sif(path, directed=True):
 
         ig.Graph : Graph encoded in the SIF file (hopefully;)
     '''
-    # TODO?: add sif validation
     nodes = set()
     edges = list()
     interactions = list()
@@ -91,7 +90,8 @@ def read_sif(path, directed=True):
             edges.extend([(source, target) for target in targets])
             interactions.extend( len(targets) * [interaction] )
     nodes = list(nodes)
-    edges = [(nodes.index(edge[0]), nodes.index(edge[1])) for edge in edges]
+    node2index = { node : nodes.index(node) for node in nodes }
+    edges = [(node2index[edge[0]], node2index[edge[1]]) for edge in edges]
     graph = ig.Graph(directed=directed)
     graph.add_vertices(len(nodes))
     graph.vs['name'] = nodes
