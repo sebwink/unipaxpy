@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>unipax package &#8212; unipaxpy 0.1beta documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="unipax-package">
+<h1>unipax package<a class="headerlink" href="#unipax-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-unipax.api">
+<span id="unipax-api-module"></span><h2>unipax.api module<a class="headerlink" href="#module-unipax.api" title="Permalink to this headline">¶</a></h2>
+<p>This module implements the Python wrapper around the UniPAX REST API.</p>
+<dl class="data">
+<dt id="unipax.api.DEFAULT_UNIPAX_ROOT_URL">
+<code class="descclassname">unipax.api.</code><code class="descname">DEFAULT_UNIPAX_ROOT_URL</code><em class="property"> = 'http://unipax.informatik.uni-tuebingen.de'</em><a class="headerlink" href="#unipax.api.DEFAULT_UNIPAX_ROOT_URL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default root url for the UniPAX REST Service.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="unipax.api.UniPaxException">
+<em class="property">exception </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxException</code><a class="reference internal" href="_modules/unipax/api.html#UniPaxException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestAll">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestAll</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestNode" title="unipax.api.UniPaxRestNode"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestNode</span></code></a></p>
+<p>&lt;unipax&gt;/all REST node.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestAllTypes">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestAllTypes</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestAllTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestAllTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestEndpoint" title="unipax.api.UniPaxRestEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestEndpoint</span></code></a></p>
+<p>&lt;unipax&gt;/all/ endpoint.</p>
+<p>Original documentation at &lt;unipax&gt;/help:</p>
+<blockquote>
+<div><p>Returns a list of all types.</p>
+<p>Syntax: /all/?filter=(biopax|sbml|none)</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>filter - restrict to BioPAX or SBML objects</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="unipax.api.UniPaxRestAllTypes.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestAllTypes.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestAllTypes.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestApi">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestApi</code><span class="sig-paren">(</span><em>root_url='http://unipax.informatik.uni-tuebingen.de'</em>, <em>tmpdir='/home/sebastian/.unipax/tmp'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestApi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestApi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Top-level API class. Contains the REST nodes which again contain REST nodes, etc.</p>
+<dl class="attribute">
+<dt id="unipax.api.UniPaxRestApi.url">
+<code class="descname">url</code><a class="headerlink" href="#unipax.api.UniPaxRestApi.url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestEndpoint">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestEndpoint</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestEndpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestEndpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestNode" title="unipax.api.UniPaxRestNode"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestNode</span></code></a></p>
+<p>A REST endpoint (something you can query).</p>
+<dl class="method">
+<dt id="unipax.api.UniPaxRestEndpoint.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>*args</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestEndpoint.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestEndpoint.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Endpoints a callable with the query parameters as arguments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="unipax.api.UniPaxRestEndpoint.download">
+<code class="descname">download</code><span class="sig-paren">(</span><em>path</em>, <em>*args</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestEndpoint.download"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestEndpoint.download" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="unipax.api.UniPaxRestEndpoint.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>*args</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestEndpoint.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestEndpoint.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the raw http response.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="unipax.api.UniPaxRestEndpoint.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>*args</em>, <em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestEndpoint.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestEndpoint.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query method. To be implemented by subclasses (ie physical endpoint classes)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestGet">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestGet</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestGet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestGet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestEndpoint" title="unipax.api.UniPaxRestEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestEndpoint</span></code></a></p>
+<p>&lt;unipax&gt;/get REST endpoint.</p>
+<p>Original documentation at &lt;unipax&gt;/help:</p>
+<blockquote>
+<div><p>Returns one or more objects from the database.</p>
+<p>Syntax: /get/&lt;unipaxId&gt;,&lt;unipaxId&gt;,...?format=(biopax|graphml|gmx|gmt)&amp;recursive=(true|false)</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>format - specifies the output format (for more than one unipaxId gmx format is changed into gmt format)
+recursive - only if format=biopax, whether or not to output referenced objects</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestGraph">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestGraph</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestNode" title="unipax.api.UniPaxRestNode"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestNode</span></code></a></p>
+<p>&lt;unipax&gt;/graph REST node.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestGraphEndpoint">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestGraphEndpoint</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestGraphEndpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestGraphEndpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestEndpoint" title="unipax.api.UniPaxRestEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestEndpoint</span></code></a></p>
+<p>Base class for &lt;unipax&gt;/graph endpoints.</p>
+<dl class="method">
+<dt id="unipax.api.UniPaxRestGraphEndpoint.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestGraphEndpoint.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestGraphEndpoint.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestGraphMetabolic">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestGraphMetabolic</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestGraphMetabolic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestGraphMetabolic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestGraphEndpoint" title="unipax.api.UniPaxRestGraphEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestGraphEndpoint</span></code></a></p>
+<p>&lt;unipax&gt;/graph/metabolic endpoint.</p>
+<p>Original documentation at &lt;unipax&gt;/help:</p>
+<blockquote>
+<div><p>Returns a metabolic network.</p>
+<p>Syntax: /graph/metabolic?&lt;parameters&gt;</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>format - specifies the output format (gml | sif | lemon | gmx | graphml)
+nodelabel - assign node labels (xref!&lt;dbname&gt; | type | name)
+edgelabel - assign edge labels (xref!&lt;dbname&gt; | type | relation)
+result - id of a result object from which to construct the network
+filter - filter the network by (pathway!&lt;id&gt; | organism!&lt;id&gt; | nodetype!&lt;type&gt; | edgetype!&lt;type&gt;)(,&lt;more filter&gt;)*</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestGraphPpi">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestGraphPpi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestGraphPpi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestGraphPpi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestGraphEndpoint" title="unipax.api.UniPaxRestGraphEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestGraphEndpoint</span></code></a></p>
+<p>&lt;unipax&gt;/graph/ppi endpoint.</p>
+<p>Original documentation at &lt;unipax&gt;/help:</p>
+<blockquote>
+<div><p>Returns a protein-protein interaction network.</p>
+<p>Syntax: /graph/ppi?&lt;parameters&gt;</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>format - specifies the output format (gml | sif | lemon | gmx | graphml)
+nodelabel - assign node labels (xref!&lt;dbname&gt; | type | name | data)
+edgelabel - assign edge labels (xref!&lt;dbname&gt; | type | relation)
+result - id of a result object from which to construct the network
+filter - filter the network by (pathway!&lt;id&gt; | organism!&lt;id&gt; | nodetype!&lt;type&gt; | edgetype!&lt;type&gt;)(,&lt;more filter&gt;)*</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestGraphRegulatory">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestGraphRegulatory</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestGraphRegulatory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestGraphRegulatory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestGraphEndpoint" title="unipax.api.UniPaxRestGraphEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestGraphEndpoint</span></code></a></p>
+<p>&lt;unipax&gt;/graph/regulatory endpoint.</p>
+<p>Original documentation at &lt;unipax&gt;/help:</p>
+<blockquote>
+<div><p>Returns a regulatory network.</p>
+<p>Syntax: /graph/regulatory?&lt;parameters&gt;</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>format - specifies the output format (gml | sif | lemon | gmx | graphml)
+nodelabel - assign node labels (xref!&lt;dbname&gt; | type | name)
+edgelabel - assign edge labels (xref!&lt;dbname&gt; | type | relation)
+result - id of a result object from which to construct the network
+filter - filter the network by (pathway!&lt;id&gt; | organism!&lt;id&gt; | nodetype!&lt;type&gt; | edgetype!&lt;type&gt;)(,&lt;more filter&gt;)*</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestHelp">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestHelp</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestHelp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestHelp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestEndpoint" title="unipax.api.UniPaxRestEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestEndpoint</span></code></a></p>
+<dl class="method">
+<dt id="unipax.api.UniPaxRestHelp.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>tab=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestHelp.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestHelp.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestInfo">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestInfo</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestNode" title="unipax.api.UniPaxRestNode"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestNode</span></code></a></p>
+<p>&lt;unipax&gt;/info REST node.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestInfoXRefDBs">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestInfoXRefDBs</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestInfoXRefDBs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestInfoXRefDBs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestEndpoint" title="unipax.api.UniPaxRestEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestEndpoint</span></code></a></p>
+<p>&lt;unipax&gt;/info/xrefdbs endpoint.</p>
+<p>Original documentation at &lt;unipax&gt;/help:</p>
+<blockquote>
+<div>Returns a list of all databases referenced</div></blockquote>
+<dl class="method">
+<dt id="unipax.api.UniPaxRestInfoXRefDBs.query">
+<code class="descname">query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestInfoXRefDBs.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestInfoXRefDBs.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestNode">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestNode</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A REST node.</p>
+<dl class="attribute">
+<dt id="unipax.api.UniPaxRestNode.append">
+<code class="descname">append</code><a class="headerlink" href="#unipax.api.UniPaxRestNode.append" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="unipax.api.UniPaxRestNode.tmpdir">
+<code class="descname">tmpdir</code><a class="headerlink" href="#unipax.api.UniPaxRestNode.tmpdir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="unipax.api.UniPaxRestNode.url">
+<code class="descname">url</code><a class="headerlink" href="#unipax.api.UniPaxRestNode.url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="unipax.api.UniPaxRestType">
+<em class="property">class </em><code class="descclassname">unipax.api.</code><code class="descname">UniPaxRestType</code><span class="sig-paren">(</span><em>parent</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#unipax.api.UniPaxRestEndpoint" title="unipax.api.UniPaxRestEndpoint"><code class="xref py py-class docutils literal"><span class="pre">unipax.api.UniPaxRestEndpoint</span></code></a></p>
+<p>&lt;unipax&gt;/all/&lt;type&gt; endpoint.</p>
+<p>Original documentation at &lt;unipax&gt;/help:</p>
+<blockquote>
+<div><p>Returns a list of all objects of the given type.</p>
+<p>Syntax: /all/&lt;type&gt;?format=(biopax|attributes|ids)&amp;recursive=(true|false)&amp;derived=(true|false)&amp;attributes=(&lt;attr&gt;:&lt;attr&gt;:...)</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>format - specifies the output format
+derived - output all objects derived from
+recursive - only if format=biopax, whether or not to output referenced objects
+attributes - only if format=attributes, which attributes to show, separated by &#8216;:&#8217;.
+Available attributes: type, name/standardName, organism, displayName</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="unipax.api.UniPaxRestType.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#UniPaxRestType.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.UniPaxRestType.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="unipax.api.time_stamp">
+<code class="descclassname">unipax.api.</code><code class="descname">time_stamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/api.html#time_stamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.api.time_stamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get time stamp, for example for temporary files etc.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-unipax.graph">
+<span id="unipax-graph-module"></span><h2>unipax.graph module<a class="headerlink" href="#module-unipax.graph" title="Permalink to this headline">¶</a></h2>
+<p>Graph utilites for UniPAX graph queries.</p>
+<dl class="function">
+<dt id="unipax.graph.read_gml">
+<code class="descclassname">unipax.graph.</code><code class="descname">read_gml</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/graph.html#read_gml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.graph.read_gml" title="Permalink to this definition">¶</a></dt>
+<dd><p>GML (Graph Modelling Language) Reader.</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Graph_Modelling_Language">https://en.wikipedia.org/wiki/Graph_Modelling_Language</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path of GML file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph encoded in the GML file (hopefully;)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ig.Graph</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="unipax.graph.read_graphml">
+<code class="descclassname">unipax.graph.</code><code class="descname">read_graphml</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/graph.html#read_graphml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.graph.read_graphml" title="Permalink to this definition">¶</a></dt>
+<dd><p>GraphML (Graph Markup Language) Reader.</p>
+<p><a class="reference external" href="http://graphml.graphdrawing.org/">http://graphml.graphdrawing.org/</a></p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/GraphML">https://en.wikipedia.org/wiki/GraphML</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path of GraphML file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph encoded in the GraphML file (hopefully;)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ig.Graph</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="unipax.graph.read_lemon">
+<code class="descclassname">unipax.graph.</code><code class="descname">read_lemon</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/graph.html#read_lemon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.graph.read_lemon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lemon (LGF, Lemon Graph Format) Reader.</p>
+<p><a class="reference external" href="http://lemon.cs.elte.hu/pub/doc/1.2.3/a00002.html">http://lemon.cs.elte.hu/pub/doc/1.2.3/a00002.html</a></p>
+<p><a class="reference external" href="http://lemon.cs.elte.hu/pub/tutorial/a00018.html">http://lemon.cs.elte.hu/pub/tutorial/a00018.html</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path of LGF file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Graph encoded in the LGF file (hopefully;)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ig.Graph</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="unipax.graph.read_sif">
+<code class="descclassname">unipax.graph.</code><code class="descname">read_sif</code><span class="sig-paren">(</span><em>path</em>, <em>directed=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/unipax/graph.html#read_sif"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#unipax.graph.read_sif" title="Permalink to this definition">¶</a></dt>
+<dd><p>SIF (Simple Interaction Format) Reader.</p>
+<p><a class="reference external" href="http://wiki.cytoscape.org/Cytoscape_User_Manual/Network_Formats">http://wiki.cytoscape.org/Cytoscape_User_Manual/Network_Formats</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path of sif file</li>
+<li><strong>directed</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; Whether to interpret the graph as directed</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Graph encoded in the SIF file (hopefully;)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ig.Graph</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-unipax">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-unipax" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">unipax package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-unipax.api">unipax.api module</a></li>
+<li><a class="reference internal" href="#module-unipax.graph">unipax.graph module</a></li>
+<li><a class="reference internal" href="#module-unipax">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/unipax.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sebastian Winkler, Thorsten Tiede.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/unipax.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

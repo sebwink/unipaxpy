@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>unipax.graph &#8212; unipaxpy 0.1beta documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for unipax.graph</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Graph utilites for UniPAX graph queries.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">igraph</span> <span class="k">as</span> <span class="nn">ig</span>
+
+<div class="viewcode-block" id="read_graphml"><a class="viewcode-back" href="../../unipax.html#unipax.graph.read_graphml">[docs]</a><span class="k">def</span> <span class="nf">read_graphml</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    GraphML (Graph Markup Language) Reader.</span>
+
+<span class="sd">    http://graphml.graphdrawing.org/</span>
+
+<span class="sd">    https://en.wikipedia.org/wiki/GraphML</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        path (str) : Path of GraphML file</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        ig.Graph : Graph encoded in the GraphML file (hopefully;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">ig</span><span class="o">.</span><span class="n">Graph</span><span class="o">.</span><span class="n">Read_GraphML</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="read_lemon"><a class="viewcode-back" href="../../unipax.html#unipax.graph.read_lemon">[docs]</a><span class="k">def</span> <span class="nf">read_lemon</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Lemon (LGF, Lemon Graph Format) Reader.</span>
+
+<span class="sd">    http://lemon.cs.elte.hu/pub/doc/1.2.3/a00002.html</span>
+
+<span class="sd">    http://lemon.cs.elte.hu/pub/tutorial/a00018.html</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        path (str) : Path of LGF file</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        ig.Graph : Graph encoded in the LGF file (hopefully;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># TODO</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="read_gml"><a class="viewcode-back" href="../../unipax.html#unipax.graph.read_gml">[docs]</a><span class="k">def</span> <span class="nf">read_gml</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    GML (Graph Modelling Language) Reader.</span>
+
+<span class="sd">    https://en.wikipedia.org/wiki/Graph_Modelling_Language</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        path (str) : Path of GML file</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        ig.Graph : Graph encoded in the GML file (hopefully;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">ig</span><span class="o">.</span><span class="n">Graph</span><span class="o">.</span><span class="n">Read_GML</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="read_sif"><a class="viewcode-back" href="../../unipax.html#unipax.graph.read_sif">[docs]</a><span class="k">def</span> <span class="nf">read_sif</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    SIF (Simple Interaction Format) Reader.</span>
+
+<span class="sd">    http://wiki.cytoscape.org/Cytoscape_User_Manual/Network_Formats</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        path (str) : Path of sif file</span>
+<span class="sd">        directed (bool) : Whether to interpret the graph as directed</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        ig.Graph : Graph encoded in the SIF file (hopefully;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">interactions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sif</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">sif</span><span class="p">:</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>    <span class="c1"># isolated nodes</span>
+                <span class="n">nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">source</span><span class="p">,</span> <span class="n">interaction</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">items</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">items</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+            <span class="n">nodes</span> <span class="o">|=</span> <span class="p">{</span><span class="n">target</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">}</span>
+            <span class="n">edges</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">])</span>
+            <span class="n">interactions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="n">interaction</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">node2index</span> <span class="o">=</span> <span class="p">{</span> <span class="n">node</span> <span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="p">}</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">node2index</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">node2index</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span> <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">]</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">ig</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">directed</span><span class="o">=</span><span class="n">directed</span><span class="p">)</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">add_vertices</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">))</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">add_edges</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">es</span><span class="p">[</span><span class="s1">&#39;interaction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interactions</span>
+    <span class="k">return</span> <span class="n">graph</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sebastian Winkler, Thorsten Tiede.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

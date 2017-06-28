@@ -1,0 +1,501 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>unipax.api &#8212; unipaxpy 0.1beta documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for unipax.api</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This module implements the Python wrapper around the UniPAX REST API.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="c1">################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">webbrowser</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">unipax.graph</span>
+
+<span class="c1">################################################################################</span>
+
+<span class="n">DEFAULT_UNIPAX_ROOT_URL</span> <span class="o">=</span> <span class="s1">&#39;http://unipax.informatik.uni-tuebingen.de&#39;</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Default root url for the UniPAX REST Service.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># Define (and make) default temporary data directories #</span>
+<span class="c1">################################################################################</span>
+
+<span class="n">__unipax_tmp__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~/.unipax/tmp&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">__unipax_tmp__</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">__unipax_tmp__</span><span class="p">)</span>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># Utility functions #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="time_stamp"><a class="viewcode-back" href="../../unipax.html#unipax.api.time_stamp">[docs]</a><span class="k">def</span> <span class="nf">time_stamp</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get time stamp, for example for temporary files etc.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M%S&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">())</span></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># Exceptions #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxException"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxException">[docs]</a><span class="k">class</span> <span class="nc">UniPaxException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<span class="c1">################################################################################</span>
+<span class="c1">################################################################################</span>
+ <span class="c1"># Core #</span>
+<span class="c1">################################################################################</span>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># The API #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestApi"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestApi">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestApi</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Top-level API class. Contains the REST nodes which again contain REST nodes, etc.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_url</span><span class="o">=</span><span class="n">DEFAULT_UNIPAX_ROOT_URL</span><span class="p">,</span> <span class="n">tmpdir</span><span class="o">=</span><span class="n">__unipax_tmp__</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">root_url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http://&#39;</span><span class="p">):</span>
+            <span class="n">root_url</span> <span class="o">=</span> <span class="s1">&#39;http://&#39;</span><span class="o">+</span><span class="n">root_url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root_url</span> <span class="o">=</span> <span class="n">root_url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span> <span class="o">=</span> <span class="n">tmpdir</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">UniPaxRestGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all</span> <span class="o">=</span> <span class="n">UniPaxRestAll</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">UniPaxRestInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="n">UniPaxRestHelp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get</span> <span class="o">=</span> <span class="n">UniPaxRestGet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">download</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">download</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">UniPaxRestGet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>    <span class="c1"># &lt;unipax&gt;/get &amp; &lt;unipax&gt;/id do the same thing!?</span>
+        <span class="c1"># self.datasource = UniPaxDatasource(self)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_url</span></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># REST node #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestNode"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestNode">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestNode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A REST node.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tmpdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">tmpdir</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">url</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">append</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_append</span></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># REST endpoint #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestEndpoint"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestEndpoint">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestEndpoint</span><span class="p">(</span><span class="n">UniPaxRestNode</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A REST endpoint (something you can query).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="UniPaxRestEndpoint.__call__"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestEndpoint.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Endpoints a callable with the query parameters as arguments.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns raw http response</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">:</span> 
+            <span class="n">url</span> <span class="o">+=</span> <span class="s1">&#39;/&#39;</span>
+            <span class="n">url</span> <span class="o">+=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UniPaxException</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+<div class="viewcode-block" id="UniPaxRestEndpoint.get"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestEndpoint.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the raw http response.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UniPaxRestEndpoint.download"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestEndpoint.download">[docs]</a>    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
+            <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="UniPaxRestEndpoint.query"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestEndpoint.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Query method. To be implemented by subclasses (ie physical endpoint classes)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">content</span></div>
+
+    <span class="k">def</span> <span class="nf">_return_list_from_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Standard implemetation of queries which return a list of items.</span>
+
+<span class="sd">        Meant to be used by subclasses to overwrite self.query.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span><span class="p">]</span></div>
+
+<span class="c1">################################################################################</span>
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/help #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestHelp"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestHelp">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestHelp</span><span class="p">(</span><span class="n">UniPaxRestEndpoint</span><span class="p">):</span>
+    <span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/help&#39;</span>
+
+<div class="viewcode-block" id="UniPaxRestHelp.query"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestHelp.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">tab</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">new</span><span class="p">))</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div></div>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/get #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestGet"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestGet">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestGet</span><span class="p">(</span><span class="n">UniPaxRestEndpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/get REST endpoint.</span>
+
+<span class="sd">    Original documentation at &lt;unipax&gt;/help:</span>
+
+<span class="sd">        Returns one or more objects from the database.</span>
+
+<span class="sd">        Syntax: /get/&lt;unipaxId&gt;,&lt;unipaxId&gt;,...?format=(biopax|graphml|gmx|gmt)&amp;recursive=(true|false)</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            format - specifies the output format (for more than one unipaxId gmx format is changed into gmt format)</span>
+<span class="sd">            recursive - only if format=biopax, whether or not to output referenced objects</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/get&#39;</span></div>
+
+<span class="c1">################################################################################</span>
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/all #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestAll"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestAll">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestAll</span><span class="p">(</span><span class="n">UniPaxRestNode</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/all REST node.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/all&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">types</span> <span class="o">=</span> <span class="n">UniPaxRestAllTypes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">all_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">all_types</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span> <span class="o">=</span> <span class="n">UniPaxRestType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/all/ #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestAllTypes"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestAllTypes">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestAllTypes</span><span class="p">(</span><span class="n">UniPaxRestEndpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/all/ endpoint.</span>
+
+<span class="sd">    Original documentation at &lt;unipax&gt;/help:</span>
+
+<span class="sd">        Returns a list of all types.</span>
+
+<span class="sd">        Syntax: /all/?filter=(biopax|sbml|none)</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            filter - restrict to BioPAX or SBML objects</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
+
+<div class="viewcode-block" id="UniPaxRestAllTypes.query"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestAllTypes.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_list_from_query</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span></div></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/all/&lt;type&gt; #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestType"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestType">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestType</span><span class="p">(</span><span class="n">UniPaxRestEndpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/all/&lt;type&gt; endpoint.</span>
+
+<span class="sd">    Original documentation at &lt;unipax&gt;/help:</span>
+
+<span class="sd">        Returns a list of all objects of the given type.</span>
+
+<span class="sd">        Syntax: /all/&lt;type&gt;?format=(biopax|attributes|ids)&amp;recursive=(true|false)&amp;derived=(true|false)&amp;attributes=(&lt;attr&gt;:&lt;attr&gt;:...)</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            format - specifies the output format</span>
+<span class="sd">            derived - output all objects derived from</span>
+<span class="sd">            recursive - only if format=biopax, whether or not to output referenced objects</span>
+<span class="sd">            attributes - only if format=attributes, which attributes to show, separated by &#39;:&#39;.</span>
+<span class="sd">            Available attributes: type, name/standardName, organism, displayName</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">name</span>
+
+<div class="viewcode-block" id="UniPaxRestType.query"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestType.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">format_</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;ids&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;ids&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_list_from_query</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;biopax&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">content</span>
+        <span class="k">elif</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;attributes&#39;</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div></div>
+
+<span class="c1">################################################################################</span>
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/info #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestInfo"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestInfo">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestInfo</span><span class="p">(</span><span class="n">UniPaxRestNode</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/info REST node.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/info&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xrefdbs</span> <span class="o">=</span> <span class="n">UniPaxRestInfoXRefDBs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/info/xrefdbs #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestInfoXRefDBs"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestInfoXRefDBs">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestInfoXRefDBs</span><span class="p">(</span><span class="n">UniPaxRestEndpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/info/xrefdbs endpoint.</span>
+
+<span class="sd">    Original documentation at &lt;unipax&gt;/help:</span>
+
+<span class="sd">        Returns a list of all databases referenced</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/xrefdbs&#39;</span>
+
+<div class="viewcode-block" id="UniPaxRestInfoXRefDBs.query"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestInfoXRefDBs.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_return_list_from_query</span><span class="p">()</span></div></div>
+
+<span class="c1">################################################################################</span>
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/graph #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestGraph"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestGraph">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestGraph</span><span class="p">(</span><span class="n">UniPaxRestNode</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/graph REST node.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/graph&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regulatory</span> <span class="o">=</span> <span class="n">UniPaxRestGraphRegulatory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metabolic</span> <span class="o">=</span> <span class="n">UniPaxRestGraphMetabolic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppi</span> <span class="o">=</span> <span class="n">UniPaxRestGraphPpi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/graph/&lt;endpoint&gt; #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestGraphEndpoint"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestGraphEndpoint">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestGraphEndpoint</span><span class="p">(</span><span class="n">UniPaxRestEndpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Base class for &lt;unipax&gt;/graph endpoints.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="UniPaxRestGraphEndpoint.query"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestGraphEndpoint.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">tmpfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmpdir</span><span class="o">+</span><span class="s1">&#39;unipax_tmp_&#39;</span><span class="o">+</span><span class="n">time_stamp</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="o">+</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;gml&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;format&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="ow">or</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;gml&#39;</span><span class="p">:</span>
+            <span class="n">graph</span> <span class="o">=</span> <span class="n">unipax</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">read_gml</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;graphml&#39;</span><span class="p">:</span>
+            <span class="n">graph</span> <span class="o">=</span> <span class="n">unipax</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">read_graphml</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lemon&#39;</span><span class="p">:</span>
+            <span class="n">graph</span> <span class="o">=</span> <span class="n">unipax</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">read_lemon</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;sif&#39;</span><span class="p">:</span>
+            <span class="n">graph</span> <span class="o">=</span> <span class="n">unipax</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">read_sif</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmpfile</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">graph</span></div></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/graph/regulatory #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestGraphRegulatory"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestGraphRegulatory">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestGraphRegulatory</span><span class="p">(</span><span class="n">UniPaxRestGraphEndpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/graph/regulatory endpoint.</span>
+
+<span class="sd">    Original documentation at &lt;unipax&gt;/help:</span>
+
+<span class="sd">        Returns a regulatory network.</span>
+
+<span class="sd">        Syntax: /graph/regulatory?&lt;parameters&gt;</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            format - specifies the output format (gml | sif | lemon | gmx | graphml)</span>
+<span class="sd">            nodelabel - assign node labels (xref!&lt;dbname&gt; | type | name)</span>
+<span class="sd">            edgelabel - assign edge labels (xref!&lt;dbname&gt; | type | relation)</span>
+<span class="sd">            result - id of a result object from which to construct the network</span>
+<span class="sd">            filter - filter the network by (pathway!&lt;id&gt; | organism!&lt;id&gt; | nodetype!&lt;type&gt; | edgetype!&lt;type&gt;)(,&lt;more filter&gt;)*</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/regulatory&#39;</span></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/graph/metabolic #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestGraphMetabolic"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestGraphMetabolic">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestGraphMetabolic</span><span class="p">(</span><span class="n">UniPaxRestGraphEndpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/graph/metabolic endpoint.</span>
+
+<span class="sd">    Original documentation at &lt;unipax&gt;/help:</span>
+
+<span class="sd">        Returns a metabolic network.</span>
+
+<span class="sd">        Syntax: /graph/metabolic?&lt;parameters&gt;</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            format - specifies the output format (gml | sif | lemon | gmx | graphml)</span>
+<span class="sd">            nodelabel - assign node labels (xref!&lt;dbname&gt; | type | name)</span>
+<span class="sd">            edgelabel - assign edge labels (xref!&lt;dbname&gt; | type | relation)</span>
+<span class="sd">            result - id of a result object from which to construct the network</span>
+<span class="sd">            filter - filter the network by (pathway!&lt;id&gt; | organism!&lt;id&gt; | nodetype!&lt;type&gt; | edgetype!&lt;type&gt;)(,&lt;more filter&gt;)*</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/metabolic&#39;</span></div>
+
+<span class="c1">################################################################################</span>
+ <span class="c1"># &lt;unipax&gt;/graph/ppi #</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="UniPaxRestGraphPpi"><a class="viewcode-back" href="../../unipax.html#unipax.api.UniPaxRestGraphPpi">[docs]</a><span class="k">class</span> <span class="nc">UniPaxRestGraphPpi</span><span class="p">(</span><span class="n">UniPaxRestGraphEndpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &lt;unipax&gt;/graph/ppi endpoint.</span>
+
+<span class="sd">    Original documentation at &lt;unipax&gt;/help:</span>
+
+<span class="sd">        Returns a protein-protein interaction network.</span>
+
+<span class="sd">        Syntax: /graph/ppi?&lt;parameters&gt;</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            format - specifies the output format (gml | sif | lemon | gmx | graphml)</span>
+<span class="sd">            nodelabel - assign node labels (xref!&lt;dbname&gt; | type | name | data)</span>
+<span class="sd">            edgelabel - assign edge labels (xref!&lt;dbname&gt; | type | relation)</span>
+<span class="sd">            result - id of a result object from which to construct the network</span>
+<span class="sd">            filter - filter the network by (pathway!&lt;id&gt; | organism!&lt;id&gt; | nodetype!&lt;type&gt; | edgetype!&lt;type&gt;)(,&lt;more filter&gt;)*</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">_append</span> <span class="o">=</span> <span class="s1">&#39;/ppi&#39;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sebastian Winkler, Thorsten Tiede.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
