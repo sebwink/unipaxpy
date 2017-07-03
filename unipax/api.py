@@ -154,7 +154,7 @@ class UniPaxRestEndpoint(UniPaxRestNode):
 
         Meant to be used by subclasses to overwrite self.query.
         '''
-        response = self.query(*args, **params)
+        response = self.get(*args, **params)
         return [item.strip() for item in response.content.decode('utf-8').split('\n') if item]
 
 ################################################################################
